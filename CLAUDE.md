@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ローカルの CSV / JSON / Parquet ファイルを **Databricks** / **Snowflake** / **Redshift** / **BigQuery** に取り込み、テーブル化して SQL で確認する **基礎学習リポジトリ**。各プラットフォームの「取り込み体験」と基本構造を比較理解することが目的であり、本番データ基盤ではない。完全な仕様は [README.md](./README.md) を参照。
 
-状態: **inception 段階**。リポジトリには確定したサンプルデータ ([data/](data/)) とディレクトリ骨組みのみ存在し、notebook / SQL の中身はこれから書く。`databricks/` `snowflake/` `docs/` 配下は空に近い。
+状態: **基礎実装段階**。サンプルデータ ([data/](data/)) に加えて、Databricks は Python バッチ (`src/`, `scripts/`) と補助 notebook、Snowflake / Redshift / BigQuery は SQL ベースの学習ひな形が入っている。
 
 ## 最重要: スコープ境界（禁止リスト）
 
@@ -23,21 +23,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## ビルド / テスト / lint
 
-**ローカルのビルド・テスト・lint システムは無い。** コードは notebook と SQL で構成され、実行は各プラットフォーム上で対話的に行う:
+**統一されたテスト / lint 基盤はまだ無い。** 実行方式はプラットフォームごとに異なる:
 
-- **Databricks 側**: ファイルを upload → notebook で `spark.read...` → `saveAsTable` で Delta Table 化 → SQL 確認。notebook は `databricks/notebooks/*.ipynb`、SQL は `databricks/sql/*.sql`。
+- **Databricks 側**: ローカル Python から `Databricks Connect` で接続し、`scripts/databricks_import.sh` または `python -m study_data_platform_import.databricks.cli` でテーブル化する。主実装は `src/study_data_platform_import/databricks/cli.py`。notebook は補助教材として残す。
 - **Snowflake 側**: internal stage に upload → `COPY INTO` でロード → SQL 確認。SQL は `snowflake/sql/*.sql`（`01_create_database_schema` → `02_create_tables` → `03_copy_into` → `04_select_examples` の順に実行）。
 - **Redshift 側**: 一時 S3 に upload → `COPY` でロード → SQL 確認。SQL は `redshift/sql/*.sql`（`01_create_schema` → `02_create_tables` → `03_copy_commands` → `04_select_examples` の順に実行）。
 - **BigQuery 側**: dataset / table を作成 → UI または `bq load` でロード → SQL 確認。SQL / メモは `bigquery/sql/*` を参照。
 
-サンプルデータ ([data/products.parquet](data/products.parquet)) を再生成する場合のみ Python (pyarrow/pandas) を使う。それ以外でローカルランタイムを前提にした実装は持ち込まない。
+Databricks バッチではローカル Python 実行を前提にしてよい。サンプルデータの読み込みには `pandas` / `pyarrow` を使う。`data/` の fixture 値・スキーマは README と同時に管理すること。
 
 ## 取り込みフロー（2 プラットフォームの対比）
 
 両者で同一ローカルファイルを取り込み、同じ SQL（JOIN / GROUP BY 集計、README §8）を流して比較するのが学習の軸:
 
 ```
-Databricks:  local file → upload → Spark DataFrame → Delta Table → SQL
+Databricks:  local file → local Python batch → Databricks Connect → Delta Table → SQL
 Snowflake:   local file → internal stage → COPY INTO → Table → SQL
 Redshift:    local file → S3 → COPY → Table → SQL
 BigQuery:    local file → load job → Table → SQL

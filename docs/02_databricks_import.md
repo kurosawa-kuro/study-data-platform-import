@@ -5,9 +5,9 @@
 ```text
 local file
   ↓
-Databricks upload
+local Python batch
   ↓
-Spark DataFrame
+Databricks Connect
   ↓
 Delta Table
   ↓
@@ -16,16 +16,15 @@ SQL
 
 ## 進め方
 
-1. `data/` 配下のファイルを Databricks ワークスペースへアップロードする
-2. notebook で `spark.read` により読み込む
-3. `saveAsTable` で Delta Table として保存する
-4. SQL で件数と内容を確認する
+1. ローカルで `pip install -e .` を実行する
+2. Databricks Connect の認証を設定する
+3. `./scripts/databricks_import.sh csv` を実行する
+4. `./scripts/databricks_import.sh query` で確認する
+5. 必要に応じて `json` `parquet` `all` を実行する
 
 ## 参照ファイル
 
-- `databricks/notebooks/01_import_csv.ipynb`
-- `databricks/notebooks/02_import_json.ipynb`
-- `databricks/notebooks/03_import_parquet.ipynb`
-- `databricks/notebooks/04_query_tables.ipynb`
+- `src/study_data_platform_import/databricks/cli.py`
+- `scripts/databricks_import.sh`
 - `databricks/sql/create_tables.sql`
 - `databricks/sql/select_examples.sql`

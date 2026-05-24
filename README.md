@@ -156,7 +156,14 @@ study-data-platform-import/
     orders.csv
     events.json
     products.parquet
+  scripts/
+    databricks_import.sh
+  src/
+    study_data_platform_import/
+      databricks/
+        cli.py
   databricks/
+    README.md
     notebooks/
       01_import_csv.ipynb
       02_import_json.ipynb
@@ -194,14 +201,16 @@ study-data-platform-import/
 
 ## 6. Databricks 側の学習内容
 
-Databricks では、ローカルファイルをアップロードし、Notebook 上で読み込み、Delta Table として保存する。
+Databricks では、ローカル Python から `Databricks Connect` 経由で接続し、バッチ的にテーブル化する。
 
 ```text
 local file
   ↓
-Databricks upload
+local Python batch
   ↓
-Spark DataFrame
+Databricks Connect
+  ↓
+Spark DataFrame / saveAsTable
   ↓
 Delta Table
   ↓
@@ -210,16 +219,21 @@ SQL
 
 学習ポイントは以下。
 
-- ファイルアップロード
-- Spark DataFrame としての読み込み
-- 一時ビュー作成
+- ローカル Python 実行
+- Databricks Connect 認証
+- Spark DataFrame への変換
 - Delta Table として保存
 - SQL での確認
 
 CSV の最小例:
 
 ```python
-df_customers = spark.read.option("header", True).csv("/FileStore/data/customers.csv")
+import pandas as pd
+from databricks.connect import DatabricksSession
+
+spark = DatabricksSession.builder.getOrCreate()
+pdf_customers = pd.read_csv("data/customers.csv")
+df_customers = spark.createDataFrame(pdf_customers)
 df_customers.write.mode("overwrite").saveAsTable("customers")
 ```
 
