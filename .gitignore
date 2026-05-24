@@ -1,0 +1,26 @@
+# Secrets / credentials (Databricks tokens, Snowflake passwords, key pairs)
+.env
+.env.*
+*.pem
+*.key
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.uv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# NOTE: data/ holds the committed sample fixtures (customers.csv, orders.csv,
+# events.json, products.parquet) and is intentionally NOT ignored. If real /
+# exported datasets are added later, ignore them explicitly here.

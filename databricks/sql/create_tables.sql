@@ -1,0 +1,18 @@
+CREATE DATABASE IF NOT EXISTS study_import;
+USE study_import;
+
+CREATE OR REPLACE TABLE customers
+USING DELTA
+AS SELECT * FROM customers_view;
+
+CREATE OR REPLACE TABLE orders
+USING DELTA
+AS SELECT * FROM orders_view;
+
+CREATE OR REPLACE TABLE events
+USING DELTA
+AS SELECT * FROM events_view;
+
+CREATE OR REPLACE TABLE products
+USING DELTA
+AS SELECT * FROM products_view;
