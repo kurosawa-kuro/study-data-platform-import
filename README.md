@@ -2,6 +2,29 @@
 
 ローカルの CSV / JSON / Parquet ファイルを Databricks / Snowflake / Redshift / BigQuery に取り込み、テーブル化と SQL 確認を行うための基礎学習リポジトリ。
 
+## 0. 最重要前提
+
+このリポジトリの Databricks 学習は、**Databricks Free Edition のみを利用可能**という制約を前提にする。
+
+そのため、以下を Databricks 学習の前提にしてはいけない。
+
+- Databricks Free Trial
+- 有償 workspace
+- 管理者権限がある通常環境
+- クラスタを自由に作成できる前提
+- 実務向けの完全なローカル開発体験
+
+特に Databricks については、**Free Edition で確実に使える機能だけを対象にする**。
+
+また、現時点の `src/` と `scripts/` にある Databricks 向け Python バッチは、**Free Edition での実動を未確認の試行実装**であり、Databricks 学習の主導線として扱わない。
+
+Databricks でまず信頼してよい主導線は以下。
+
+- Free Edition のワークスペース UI
+- Free Edition の Serverless SQL Warehouse
+- 画面上での SQL 実行確認
+- ローカルからの SQL Warehouse 疎通確認
+
 ## 1. 目的
 
 本リポジトリの目的は、Databricks / Snowflake / Redshift / BigQuery の高度機能を網羅することではない。
@@ -158,10 +181,12 @@ study-data-platform-import/
     products.parquet
   scripts/
     databricks_import.sh
+    databricks_sql_test.sh
   src/
     study_data_platform_import/
       databricks/
         cli.py
+        sql_connectivity.py
   databricks/
     README.md
     notebooks/
@@ -201,31 +226,37 @@ study-data-platform-import/
 
 ## 6. Databricks 側の学習内容
 
-Databricks では、ローカル Python から `Databricks Connect` 経由で接続し、バッチ的にテーブル化する。
+Databricks は **Free Edition 限定**で学習する。
+
+この制約のため、Databricks だけは他プラットフォームよりも使い方を強く制限して考える必要がある。
+
+現時点では、Databricks の主導線は **Free Edition の UI と SQL Warehouse を使った確認** である。
 
 ```text
 local file
   ↓
-local Python batch
+Databricks Free Edition UI
   ↓
-Databricks Connect
-  ↓
-Spark DataFrame / saveAsTable
-  ↓
-Delta Table
+SQL Warehouse / local SQL connectivity test
   ↓
 SQL
 ```
 
 学習ポイントは以下。
 
-- ローカル Python 実行
-- Databricks Connect 認証
-- Spark DataFrame への変換
-- Delta Table として保存
-- SQL での確認
+- Free Edition の制約を理解する
+- SQL Warehouse に接続できることを確認する
+- ローカルから `SELECT 1` を返せることを確認する
+- UI 上で扱える範囲を把握する
+- SQL での確認を優先する
 
-CSV の最小例:
+### 重要
+
+`Databricks Connect` や `scripts/databricks_import.sh` を使う Python バッチ構成は、**Free Edition で確実に使える前提には立たない**。
+
+そのため、このリポジトリでは Databricks の Python バッチを **参考実装 / 検証候補** として扱い、Free Edition での主導線としては扱わない。
+
+参考実装としての最小例:
 
 ```python
 import pandas as pd
@@ -236,6 +267,8 @@ pdf_customers = pd.read_csv("data/customers.csv")
 df_customers = spark.createDataFrame(pdf_customers)
 df_customers.write.mode("overwrite").saveAsTable("customers")
 ```
+
+ただし、これは **Free Edition で利用可能と確定した手順ではない**。
 
 ## 7. Snowflake 側の学習内容
 

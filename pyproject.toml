@@ -5,12 +5,14 @@ description = "Study repository for importing local files into Databricks, Snowf
 requires-python = ">=3.10"
 dependencies = [
   "databricks-connect>=15.4",
+  "databricks-sql-connector>=4.0",
   "pandas>=2.2",
   "pyarrow>=16.0",
 ]
 
 [project.scripts]
 databricks-import = "study_data_platform_import.databricks.cli:main"
+databricks-sql-test = "study_data_platform_import.databricks.sql_connectivity:main"
 
 [build-system]
 requires = ["setuptools>=68"]

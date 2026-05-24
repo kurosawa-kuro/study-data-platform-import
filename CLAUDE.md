@@ -6,6 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ローカルの CSV / JSON / Parquet ファイルを **Databricks** / **Snowflake** / **Redshift** / **BigQuery** に取り込み、テーブル化して SQL で確認する **基礎学習リポジトリ**。各プラットフォームの「取り込み体験」と基本構造を比較理解することが目的であり、本番データ基盤ではない。完全な仕様は [README.md](./README.md) を参照。
 
+## 最重要前提
+
+Databricks 学習は、**Databricks Free Edition のみ利用可能**という前提で扱う。
+
+Free Trial、有償 workspace、管理者権限のある通常環境を前提にした提案は避けること。
+
+Databricks の Python バッチや `Databricks Connect` は、Free Edition で実動確認が取れるまで **参考実装** として扱い、主導線として断定しないこと。
+
+Databricks の主導線は、まず `SQL Warehouse` に対するローカル疎通確認 (`SELECT 1`) とする。
+
 状態: **基礎実装段階**。サンプルデータ ([data/](data/)) に加えて、Databricks は Python バッチ (`src/`, `scripts/`) と補助 notebook、Snowflake / Redshift / BigQuery は SQL ベースの学習ひな形が入っている。
 
 ## 最重要: スコープ境界（禁止リスト）
@@ -25,7 +35,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **統一されたテスト / lint 基盤はまだ無い。** 実行方式はプラットフォームごとに異なる:
 
-- **Databricks 側**: ローカル Python から `Databricks Connect` で接続し、`scripts/databricks_import.sh` または `python -m study_data_platform_import.databricks.cli` でテーブル化する。主実装は `src/study_data_platform_import/databricks/cli.py`。notebook は補助教材として残す。
+- **Databricks 側**: まず `scripts/databricks_sql_test.sh` または `python -m study_data_platform_import.databricks.sql_connectivity` で SQL Warehouse への疎通確認を行う。`Databricks Connect` ベースの `src/study_data_platform_import/databricks/cli.py` と `scripts/databricks_import.sh` は参考実装として残す。notebook は補助教材として残す。
 - **Snowflake 側**: internal stage に upload → `COPY INTO` でロード → SQL 確認。SQL は `snowflake/sql/*.sql`（`01_create_database_schema` → `02_create_tables` → `03_copy_into` → `04_select_examples` の順に実行）。
 - **Redshift 側**: 一時 S3 に upload → `COPY` でロード → SQL 確認。SQL は `redshift/sql/*.sql`（`01_create_schema` → `02_create_tables` → `03_copy_commands` → `04_select_examples` の順に実行）。
 - **BigQuery 側**: dataset / table を作成 → UI または `bq load` でロード → SQL 確認。SQL / メモは `bigquery/sql/*` を参照。
@@ -37,7 +47,7 @@ Databricks バッチではローカル Python 実行を前提にしてよい。�
 両者で同一ローカルファイルを取り込み、同じ SQL（JOIN / GROUP BY 集計、README §8）を流して比較するのが学習の軸:
 
 ```
-Databricks:  local file → local Python batch → Databricks Connect → Delta Table → SQL
+Databricks:  local client → SQL Warehouse connectivity test → SQL
 Snowflake:   local file → internal stage → COPY INTO → Table → SQL
 Redshift:    local file → S3 → COPY → Table → SQL
 BigQuery:    local file → load job → Table → SQL
