@@ -44,7 +44,9 @@ Free Edition で使えると確認できるまでは、Databricks 学習の主�
 1. Free Edition の UI で SQL Warehouse を確認する
 2. `Server hostname` `HTTP path` `token` を取得する
 3. `./scripts/databricks_sql_test.sh` で `SELECT 1` を通す
-4. その後に必要なら Python バッチを個別検証する
+4. `./scripts/databricks_sql_test.sh --mode catalog` を試す
+5. `./scripts/databricks_sql_test.sh --mode ctas` を試す
+6. その後に必要なら Python バッチを個別検証する
 
 ## 参照ファイル
 

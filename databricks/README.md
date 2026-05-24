@@ -127,6 +127,24 @@ export DATABRICKS_TOKEN="dapi...."
 ./scripts/databricks_sql_test.sh --query "SELECT current_catalog()"
 ```
 
+### 5.6 `current_catalog()` を試す
+
+```bash
+./scripts/databricks_sql_test.sh --mode catalog
+```
+
+### 5.7 最小の `CREATE TABLE AS SELECT` を試す
+
+```bash
+./scripts/databricks_sql_test.sh --mode ctas
+```
+
+このテストでは、以下を順に流す。
+
+- `CREATE SCHEMA IF NOT EXISTS workspace.default`
+- `CREATE OR REPLACE TABLE workspace.default.free_edition_sql_test AS SELECT 1 AS ok`
+- `SELECT * FROM workspace.default.free_edition_sql_test`
+
 ## 6. Python バッチ実装の位置づけ
 
 以下はリポジトリ内に存在するが、**Free Edition 対応済みとは見なさない**。
@@ -200,6 +218,18 @@ scripts/databricks_import.sh
 ./scripts/databricks_sql_test.sh --query "SELECT 1"
 ```
 
+catalog 確認:
+
+```bash
+./scripts/databricks_sql_test.sh --mode catalog
+```
+
+CTAS 確認:
+
+```bash
+./scripts/databricks_sql_test.sh --mode ctas
+```
+
 以下は参考実装:
 
 CSV だけ:
@@ -259,8 +289,9 @@ database 名を変えたい場合:
 最初は以下の順が分かりやすい。
 
 1. `./scripts/databricks_sql_test.sh`
-2. `./scripts/databricks_sql_test.sh --query "SELECT current_catalog()"`
-3. その後に必要なら Python バッチ参考実装を個別検証する
+2. `./scripts/databricks_sql_test.sh --mode catalog`
+3. `./scripts/databricks_sql_test.sh --mode ctas`
+4. その後に必要なら Python バッチ参考実装を個別検証する
 
 ## 12. notebook について
 
